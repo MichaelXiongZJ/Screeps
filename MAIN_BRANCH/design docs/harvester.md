@@ -16,3 +16,4 @@
     - If container DNE, the harvester will mine at the place it pleases.
 - Since harvester has no [CARRY] component, resource wil drop right into the container
 - Pick a pot to leave a construction site for container
+    - if target is >20 tiles from spawn, harvester will build link instead (if possible)

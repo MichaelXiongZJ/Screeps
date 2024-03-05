@@ -14,7 +14,6 @@ var roleWorker = {
         if (creep.memory.working) {
             this.handleWork(creep);
         } else {
-            creep.memory.upgrading = false;
             this.handleCollection(creep);
         }
     },
@@ -62,7 +61,7 @@ var roleWorker = {
             } else {
                 creep.say('outdated target');
             }
-        } else if (creep.memory.upgrading == true){
+        } else {
             helperFunctions.moveToPerform(creep, creep.room.controller, () => creep.upgradeController(creep.room.controller));
         }
     },

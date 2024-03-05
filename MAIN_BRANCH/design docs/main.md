@@ -15,6 +15,12 @@
     - lower CPU usage
         - path
         - more mmeory items
-- Link behaviors
-    - Room saves link_in and link_out for creeps
+- Link behaviors (urgent)
+    - Two kinds of room - spawn closer with controller (controller_spawn), and closer with source (source_spawn)
+    - controller_spawn:
+        - A Link will be next to controller, and marked as reciever, and only upgraders can withdraw from it
+        - A link will be next to storage, and marked as sender, and hauler can transfer to it. (piority after extensions)
+    - source_spawn: ???
+
+
 

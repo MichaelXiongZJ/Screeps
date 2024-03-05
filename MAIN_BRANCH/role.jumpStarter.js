@@ -10,6 +10,12 @@ var roleJumpStarter = {
             return;
         }
 
+        if(!creep.room.controller){
+            // creep.move(TOP_LEFT);
+            console.log("JumpStarter arrived, but room has no controller.");
+            return;
+        }
+
         this.updateStates(creep);
 
         if (creep.memory.working) {
@@ -21,7 +27,7 @@ var roleJumpStarter = {
     },
 
     updateStates: function(creep) {
-        if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
+        if (!creep.memory.working && creep.store.getFreeCapacity() < 10) {
             creep.memory.working = true;
             delete creep.memory.target;
             creep.say('🔄 working');
@@ -42,7 +48,9 @@ var roleJumpStarter = {
             if (target) {
                 creep.memory.target = target.id;
             } else {    // then MINE
-                var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES);
+                var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES,{
+                    filter: source => source.energy > 0
+                });
                 helperFunctions.moveToPerform(creep, sourceSpot, () => creep.harvest(sourceSpot));
             }
         }

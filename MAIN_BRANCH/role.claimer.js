@@ -9,7 +9,11 @@ var roleClaimer = {
             creep.moveTo(creep.pos.findClosestByRange(exit),{visualizePathStyle: {stroke: 'COLOR_PURPLE'}});
         }else{
             var newController = creep.room.controller;
-            helperFunctions.moveToPerform(creep, newController, () => creep.claimController(newController));
+            if (newController){
+                helperFunctions.moveToPerform(creep, newController, () => creep.claimController(newController));
+            }else{  // room got no controller, move to center
+                console.log("Claimer arrived, but room has no controller.")
+            }   
         }
     }
 };
