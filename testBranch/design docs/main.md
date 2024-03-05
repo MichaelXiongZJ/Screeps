@@ -15,4 +15,6 @@
     - lower CPU usage
         - path
         - more mmeory items
+- Link behaviors
+    - Room saves link_in and link_out for creeps
 

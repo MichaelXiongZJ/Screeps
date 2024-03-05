@@ -53,16 +53,17 @@ var roleHauler = {
             creep.say('🔄collect');
         }
     },
-
+    
     collect: function(creep) {
-        if (creep.memory.target && !helperFunctions.collectSourceTarget(creep, creep.memory.target)) {
-            delete creep.memory.target
-        }
-        const target = helperFunctions.getSourceTarget(creep);
-        if (target) {
-            creep.memory.target = target.id;
-        } else {
-            creep.say('!collect');
+        let target = Game.getObjectById(creep.memory.target);
+        if (!target || !helperFunctions.collectSourceTarget(creep, target)) {
+            delete creep.memory.target;
+            target = helperFunctions.getSourceTarget(creep);
+            if (target) {
+                creep.memory.target = target.id;
+            } else {
+                creep.say('!collect');
+            }
         }
     }
 };

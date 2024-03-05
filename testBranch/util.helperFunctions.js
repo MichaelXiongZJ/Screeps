@@ -18,15 +18,16 @@ var getSourceTarget = function(creep) {
                                 s.store.getUsedCapacity() >= 50 &&
                                 s.id != creep.room.memory.upgraderStructureID
             });
-
             // If there are containers, find the one with the maximum stored capacity
             if (containers.length > 0) {
                 target = _.max(containers, (c) => _.sum(c.store));
+                creep.say('container time');
             }
         }
         
         // look for storage
         if (!target) {
+            creep.say('storage time');
             target = creep.room.storage;
         }
         
@@ -74,7 +75,10 @@ var selfRecycle = function(creep){
 var moveToPerform = function(creep, target, action) {
     let result = action();
     if (result === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+        creep.moveTo(target, {
+            visualizePathStyle: {stroke: '#ffffff'},
+            // ignoreCreeps: true  // testing
+        });
     }else if (result !== OK){
         let errMsg = this.errorConstants[result.toString()] || 'UNKNOWN_ERROR';
         creep.say(`${errMsg}`);
