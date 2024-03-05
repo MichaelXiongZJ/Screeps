@@ -1,73 +1,85 @@
-const helperFunctions = require('util.helperFunctions');
+var helperFunctions = require('util.helperFunctions');
 
-const roleHauler = {
-    run(creep) {
+var roleHauler = {
+    distributionPriorities: [
+        {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+        {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+        {type: STRUCTURE_TOWER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 200},
+        {type: STRUCTURE_CONTAINER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 100 && s.id === creep.room.memory.upgraderStructureID},
+        {type: STRUCTURE_STORAGE, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0}
+    ],
+
+    run: function(creep) {
         this.updateStates(creep);
-
+        
         if (creep.memory.recycle) {
             helperFunctions.selfRecycle(creep);
             return;
         }
 
         if (!creep.memory.hauling) {
-            this.collectResources(creep);
+            this.collect(creep);
         } else {
-            this.distributeResources(creep);
+            this.distribute(creep);
         }
     },
 
-    updateStates(creep) {
+    updateStates: function(creep) {
         if (creep.ticksToLive < 50 && creep.store.getUsedCapacity() === 0) {
             creep.memory.recycle = true;
         } else if (!creep.memory.hauling && creep.store.getUsedCapacity() > creep.store.getCapacity() * 0.9) {
             creep.memory.hauling = true;
-            delete creep.memory.target;
-            creep.say('🔄 haul');
+            this.assignNewTarget(creep, 'distribute');
+            creep.say('🔄haul');
         } else if (creep.memory.hauling && creep.store.getUsedCapacity() === 0) {
             creep.memory.hauling = false;
-            delete creep.memory.target;
-            creep.say('🔄 collect');
+            this.assignNewTarget(creep, 'collect');
+            creep.say('🔄collect');
+        }
+    },
+    
+    collect: function(creep) {
+        if (!creep.memory.target || !helperFunctions.collectSourceTarget(creep, Game.getObjectById(creep.memory.target))) {
+            this.assignNewTarget(creep, 'collect');
         }
     },
 
-    collectResources(creep) {
-        let target = Game.getObjectById(creep.memory.target);
-        if (!target || !helperFunctions.collectSourceTarget(creep, target)) {
-            delete creep.memory.target;
+    distribute: function(creep) {
+        const target = Game.getObjectById(creep.memory.target);
+        if (!target) {
+            this.assignNewTarget(creep, 'distribute');
+        } else {
+            helperFunctions.moveToPerform(creep, target, () => creep.transfer(target, RESOURCE_ENERGY));
+        }
+    },
+
+    assignNewTarget: function(creep, action) {
+        delete creep.memory.target;
+        let target = null;
+
+        if (action === 'collect') {
             target = helperFunctions.getSourceTarget(creep);
             if (target) {
                 creep.memory.target = target.id;
+                helperFunctions.moveToPerform(creep, target, () => {});
             } else {
                 creep.say('!collect');
             }
-        }
-    },
+        } else if (action === 'distribute') {
+            for (let priority of this.distributionPriorities) {
+                target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: s => s.structureType === priority.type && priority.filter(s)
+                });
+                if (target) break;
+            }
 
-    distributeResources(creep) {
-        const priorities = [
-            { type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0 },
-            { type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0 },
-            { type: STRUCTURE_TOWER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 200 },
-            { type: STRUCTURE_CONTAINER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 100 && s.id === creep.room.memory.upgraderStructureID },
-            { type: STRUCTURE_STORAGE, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0 }
-        ];
-
-        let target = this.findDistributionTarget(creep, priorities);
-        if (target) {
-            helperFunctions.moveToPerform(creep, target, () => creep.transfer(target, RESOURCE_ENERGY));
-        } else {
-            creep.say('!haul');
+            if (target) {
+                creep.memory.target = target.id;
+                helperFunctions.moveToPerform(creep, target, () => {});
+            } else {
+                creep.say('!haul');
+            }
         }
-    },
-
-    findDistributionTarget(creep, priorities) {
-        for (let priority of priorities) {
-            const target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: s => s.structureType === priority.type && priority.filter(s)
-            });
-            if (target) return target;
-        }
-        return null;
     }
 };
 

@@ -22,9 +22,12 @@ var roomController = {
 
         if (room.memory.sources) {
             room.memory.sources.forEach(sourceAssignment => {
-                if (sourceAssignment.harvester 
-                    && (!Game.creeps[sourceAssignment.harvester] || Game.creeps[sourceAssignment.harvester].ticksToLive < 20)) {
-                    sourceAssignment.harvester = null;  // Reset if the harvester no longer exists
+                if (sourceAssignment.harvester) {
+                    const harvesterCreep = Game.creeps[sourceAssignment.harvester];
+                    // Check if the harvester exists, has more than 20 ticks to live, and is in the same room as the source
+                    if (!harvesterCreep || harvesterCreep.ticksToLive < 20 || harvesterCreep.room.name !== room.name) {
+                        sourceAssignment.harvester = null;
+                    }
                 }
             });
         } else {
@@ -150,7 +153,7 @@ var roomController = {
         var wanted = Math.ceil(effectiveLength / 2);
         
         if (roomLevel < 2){
-            return numSources*2;
+            return numSources*2 + 1;
         }else if (roomLevel < 5){
             return Math.min(wanted, 3);
         }

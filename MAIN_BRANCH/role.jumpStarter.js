@@ -27,7 +27,7 @@ var roleJumpStarter = {
     },
 
     updateStates: function(creep) {
-        if (!creep.memory.working && creep.store.getFreeCapacity() < 10) {
+        if (!creep.memory.working && creep.store.getFreeCapacity() === 0) {
             creep.memory.working = true;
             delete creep.memory.target;
             creep.say('🔄 working');

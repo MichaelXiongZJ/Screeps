@@ -15,6 +15,6 @@
     - lower CPU usage
         - path
         - more mmeory items
-- Link behaviors
-    - Room saves link_in and link_out for creeps
+- figure out room reservation
+    - claim room can have reserved nearby rooms, which will be mined from
 

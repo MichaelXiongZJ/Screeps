@@ -1,125 +1,105 @@
 var roleTower = require('role.tower');
+var linkOperations = require('role.link');
 
 var roomController = {
     run: function(room) {
         this.updateRoomMemory(room);
         this.controlTowers(room);
         this.managePopulation(room);
+        // linkOperations.manageLinks(room);
     },
 
     updateRoomMemory: function(room) {
-        // Update fix_list with structures that need repair
-        room.memory.fix_list = room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.hits < structure.hitsMax)
-                    && !(structure.structureType === STRUCTURE_WALL && structure.hits > 2000) 
-                    && !(structure.structureType === STRUCTURE_RAMPART && structure.hits > 2000);
-            }
-        }).map(structure => structure.id);
-
-        // Update build_list with construction sites
-        room.memory.build_list = room.find(FIND_CONSTRUCTION_SITES).map(site => site.id);
-
-        if (room.memory.sources) {
-            room.memory.sources.forEach(sourceAssignment => {
-                if (sourceAssignment.harvester 
-                    && (!Game.creeps[sourceAssignment.harvester] || Game.creeps[sourceAssignment.harvester].ticksToLive < 20)) {
-                    sourceAssignment.harvester = null;  // Reset if the harvester no longer exists
-                }
-            });
-        } else {
-            this.initializeRoomSources(room);
-        }
-        if (room.controller){   // if this room has a controller
-            if (!room.memory.upgraderStructureID || !Game.getObjectById(room.memory.upgraderStructureID)){
-                room.memory.upgraderStructureID = this.getUpgraderStructure(room);
-            }
-        }
+        this.updateRepairList(room);
+        this.updateConstructionList(room);
+        this.updateSourceAssignments(room);
+        this.updateUpgraderStructure(room);
     },
 
-    initializeRoomSources(room) {
+    updateRepairList: function(room) {
+        room.memory.fix_list = room.find(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax &&
+                                    structure.structureType !== STRUCTURE_WALL &&
+                                    structure.structureType !== STRUCTURE_RAMPART
+        }).map(structure => structure.id);
+    },
+
+    updateConstructionList: function(room) {
+        room.memory.build_list = room.find(FIND_CONSTRUCTION_SITES).map(site => site.id);
+    },
+
+    updateSourceAssignments: function(room) {
+        if (!room.memory.sources) {
+            this.initializeRoomSources(room);
+            return;
+        }
+
+        room.memory.sources.forEach(source => {
+            const harvester = Game.creeps[source.harvester];
+            if (!harvester || harvester.ticksToLive < 20 || harvester.room.name !== room.name) {
+                source.harvester = null;  // Reset if harvester is invalid
+            }
+        });
+    },
+
+    initializeRoomSources: function(room) {
         room.memory.sources = room.find(FIND_SOURCES).map(source => ({
-            id: source.id, 
+            id: source.id,
             harvester: null
         }));
+    },
+
+    updateUpgraderStructure: function(room) {
+        if (!room.controller) return;
+
+        const upgraderStructures = room.controller.pos.findInRange(FIND_STRUCTURES, 5, {
+            filter: ({structureType}) => structureType === STRUCTURE_CONTAINER || structureType === STRUCTURE_LINK
+        });
+
+        room.memory.upgraderStructureID = upgraderStructures[0]?.id || null;
     },
 
     controlTowers: function(room) {
         const towers = room.find(FIND_MY_STRUCTURES, {
             filter: {structureType: STRUCTURE_TOWER}
         });
-        towers.forEach(tower => {
-            roleTower.run(tower);
-        });
+
+        towers.forEach(tower => roleTower.run(tower));
     },
 
-    managePopulation: function(room) {  // prepare stats for spawn to read
+    managePopulation: function(room) {
         const numSources = room.memory.sources.length;
-        const roomPowerLevel = this.calculateRoomLevel(room); 
-        const targetPopulations = {
+        const roomLevel = this.calculateRoomLevel(room);
+
+        room.memory.targetPopulations = {
             harvester: numSources,
-            hauler: this.calculateHaulersNeeded(room, numSources, roomPowerLevel),
-            worker: this.calculateWorkersNeeded(room, numSources, roomPowerLevel),
-            upgrader: this.calculatedUpgradersNeeded(room),
-            jumpStarter: this.calculateJumpStartersNeeded(room),
+            hauler: this.calculateHaulersNeeded(roomLevel, numSources),
+            worker: this.calculateWorkersNeeded(room),
+            upgrader: this.calculateUpgradersNeeded(room),
+            jumpStarter: this.calculateJumpStartersNeeded(room)
         };
-        const currentPopulations = this.getCurrentPopulation(room);
-        room.memory.targetPopulations = targetPopulations;
-        room.memory.currentPopulations = currentPopulations;
-    },
-    
-    
-    getUpgraderStructure: function(room) {
-        var struct = room.controller.pos.findInRange(FIND_STRUCTURES, 5, {
-            filter: (structure) => structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_LINK
-        })[0];
-        if (struct) {
-            return struct.id;
-        }
-        return null;
+
+        room.memory.currentPopulations = this.getCurrentPopulation(room);
     },
 
     calculateRoomLevel: function(room) {
-        const avaliableEnergy = room.energyCapacityAvailable;
-        if (avaliableEnergy < 550){    //  RCL 1
-            room.memory.level = 1;
-            return 1
-        }else if (avaliableEnergy < 800) {  //  RCL 2
-            room.memory.level = 2;
-            return 2
-        }else if (avaliableEnergy < 1300) {  //  RCL 3
-            room.memory.level = 3;
-            return 3
-        }else if (avaliableEnergy < 1800) {  // RCL 4
-            room.memory.level = 4;
-            return 4
-        }else if (avaliableEnergy < 2300) { // RCL 5
-            room.memory.level = 5;
-            return 5
-        }else {     // RCL 6
-            room.memory.level = 6;
-            return 6
-        }
+        const energyLevels = [550, 800, 1300, 1800, 2300];
+        const level = energyLevels.findIndex(level => room.energyCapacityAvailable < level) + 1;
+        return room.memory.level = level || 6;
     },
 
     getCurrentPopulation: function(room) {
-        var totalPopulation = 0;
-        const population = room.find(FIND_MY_CREEPS).reduce((pop, creep) => {
-            if (creep.memory.role) {
-                if (!pop[creep.memory.role]) {
-                    pop[creep.memory.role] = 0;
-                }
-                if (creep.ticksToLive >= 20){
-                    pop[creep.memory.role]++;
-                }
-                totalPopulation++;
+        const population = room.find(FIND_MY_CREEPS).reduce((acc, creep) => {
+            if (creep.memory.role && creep.ticksToLive >= 20) {
+                acc[creep.memory.role] = (acc[creep.memory.role] || 0) + 1;
             }
-            return pop;
+            return acc;
         }, {});
-        room.memory.totalPopulation = totalPopulation;
-        return population
-    }, 
-    
+
+        room.memory.totalPopulation = Object.values(population).reduce((sum, count) => sum + count, 0);
+        return population;
+    },
+
     calculatedUpgradersNeeded: function(room) {
         var struct = Game.getObjectById(room.memory.upgraderStructureID);
         if(struct){
@@ -170,7 +150,6 @@ var roomController = {
         }
         return numSources;
     },
-
 };
 
 module.exports = roomController;
