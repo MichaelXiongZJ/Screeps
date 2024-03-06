@@ -1,20 +1,17 @@
 var helperFunctions = require('util.helperFunctions');
 
 var roleJumpStarter = {
-    workPriorities: [
-        {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
-        {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
-    ],
-
     run: function(creep) {
-        if (creep.memory.workRoom && (creep.room.name !== creep.memory.workRoom)) {
+
+        if(creep.memory.workRoom && (creep.room.name !== creep.memory.workRoom)){
             creep.say("Exiting...");
-            const exit = creep.room.findExitTo(creep.memory.workRoom);
-            creep.moveTo(creep.pos.findClosestByRange(exit), {visualizePathStyle: {stroke: '#800080'}});
+            var exit = creep.room.findExitTo(creep.memory.workRoom);
+            creep.moveTo(creep.pos.findClosestByRange(exit),{visualizePathStyle: {stroke: 'COLOR_PURPLE'}});
             return;
         }
 
-        if (!creep.room.controller) {
+        if(!creep.room.controller){
+            // creep.move(TOP_LEFT);
             console.log("JumpStarter arrived, but room has no controller.");
             return;
         }
@@ -24,6 +21,7 @@ var roleJumpStarter = {
         if (creep.memory.working) {
             this.handleWork(creep);
         } else {
+            creep.memory.upgrading = false;
             this.handleCollection(creep);
         }
     },
@@ -59,38 +57,32 @@ var roleJumpStarter = {
     },
 
     handleWork: function(creep) {
-        let target = this.findWorkTarget(creep);
-        if (target) {
-            if (target instanceof ConstructionSite) {
-                helperFunctions.moveToPerform(creep, target, () => creep.build(target));
-            } else {
-                helperFunctions.moveToPerform(creep, target, () => creep.transfer(target, RESOURCE_ENERGY));
-            }
-        } else {
-            helperFunctions.moveToPerform(creep, creep.room.controller, () => creep.upgradeController(creep.room.controller));
-        }
-    },
 
-    findWorkTarget: function(creep) {
-        let target = null;
-        // Check for energy filling targets
-        for (let priority of this.workPriorities) {
+        const priorities = [    // haul piority
+            {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+            {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+        ];
+
+        let target = null;  // find a haul target
+        for (let priority of priorities) {
             target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: s => s.structureType === priority.type && priority.filter(s)
             });
-            if (target) return target;
+            if (target) break;
         }
 
-        // Check for construction sites if no filling targets are found
-        if (creep.room.memory.build_list && creep.room.memory.build_list.length > 0) {
+        if (target) {   // if haul target exist
+            helperFunctions.moveToPerform(creep, target, () => creep.transfer(target, RESOURCE_ENERGY));
+        } else if (creep.room.memory.build_list && creep.room.memory.build_list.length > 0) { // build
             let constructionSites = creep.room.memory.build_list.map(id => Game.getObjectById(id)).filter(site => site !== null);
-            target = creep.pos.findClosestByPath(constructionSites);
-            if (target) return target;
+            let target = creep.pos.findClosestByPath(constructionSites);
+            if (target) {
+                helperFunctions.moveToPerform(creep, target, () => creep.build(target));
+            }
+        } else {    // upgrade
+            helperFunctions.moveToPerform(creep, creep.room.controller, () => creep.upgradeController(creep.room.controller));
         }
-
-        // Default to controller upgrade if no other work is found
-        return null;
-    }
+    },
 };
 
 module.exports = roleJumpStarter;

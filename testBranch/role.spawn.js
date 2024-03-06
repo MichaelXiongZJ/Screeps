@@ -33,6 +33,8 @@ var roleSpawn = {
                         if (unassignedSource) {
                             memory.target = unassignedSource.id;
                             unassignedSource.harvester = name; // Update room memory
+                        }else{
+                            break;  // if can't assign a source target, skip it
                         }
                     }
                     let result = spawn.spawnCreep(body, name, {memory: memory});

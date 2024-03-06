@@ -16,4 +16,7 @@ Link is needed for long distance harvesting and long distance controller upgrade
     - if controller link exists
         - Home link will be sender, and hauler will transfer to it
     - if harvester link AND controller link exists
-        - Home link will be ????idk yet
+        - harvester link will pioritize transfer to controller link, then home link
+
+# Initiating link roles
+    - Handeled by the room

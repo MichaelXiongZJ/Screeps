@@ -17,7 +17,7 @@ var towerController = {
         }
 
         // Fix structures listed in room.memory.fix_list if no hostiles or damaged friendlies
-        if (tower.store.getUsedCapacity(RESOURCE_ENERGY) > 100 && tower.room.memory.fix_list && tower.room.memory.fix_list.length > 0) {
+        if (tower.store.getUsedCapacity(RESOURCE_ENERGY) > 200 && tower.room.memory.fix_list && tower.room.memory.fix_list.length > 0) {
             fixTarget = this.findClosestStructureByIds(tower, tower.room.memory.fix_list)
             if (fixTarget) {
                 tower.repair(fixTarget);

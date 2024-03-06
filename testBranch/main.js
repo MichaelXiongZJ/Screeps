@@ -57,4 +57,13 @@ module.exports.loop = function() {
             console.log('Unknow creep role: ', creepName);
         }
     }
+    
+    
+    if(Game.cpu.bucket == 10000) {
+        Game.cpu.generatePixel();
+        console.log('Generating pixel!');
+    }else{
+        console.log( 'CPU bucket: ', Game.cpu.bucket);
+    }
+
 }
