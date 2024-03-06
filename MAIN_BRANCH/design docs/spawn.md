@@ -1,4 +1,0 @@
-## Spawn
-
-Handle respawn creeps
-

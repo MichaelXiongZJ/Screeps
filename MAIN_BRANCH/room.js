@@ -13,7 +13,7 @@ var roomController = {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax)
                     && !(structure.structureType === STRUCTURE_WALL && structure.hits > 2000) 
-                    && !(structure.structureType === STRUCTURE_RAMPART && structure.hits > 2000);
+                    && !(structure.structureType === STRUCTURE_RAMPART /*&& structure.hits > 2000*/)
             }
         }).map(structure => structure.id);
 
