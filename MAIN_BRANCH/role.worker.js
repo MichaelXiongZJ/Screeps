@@ -45,7 +45,7 @@ var roleWorker = {
             creep.memory.target = creep.room.storage.id;
         } else {
             let target = this.getSourceTarget(creep);
-            if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+            if (target) {
                 creep.memory.target = target.id;
             } else {    // then MINE
                 creep.say('harvest');
