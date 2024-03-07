@@ -45,9 +45,10 @@ var roleJumpStarter = {
             }
         }else{  // no target
             let target = helperFunctions.getSourceTarget(creep);
-            if (target) {
+            if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                 creep.memory.target = target.id;
             } else {    // then MINE
+                creep.say('harvest');
                 var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES,{
                     filter: source => source.energy > 0
                 });

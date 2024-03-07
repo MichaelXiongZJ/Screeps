@@ -14,15 +14,31 @@ var roleHauler = {
         if (!creep.memory.hauling) {
             this.collect(creep);
         } else {
+            // if hauler has special resource, transfer them to storage first
+            if (creep.store.getUsedCapacity() > creep.store.getUsedCapacity(RESOURCE_ENERGY)){
+                let target = creep.room.storage;
+                if(!target) {
+                    target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                        filter: s => s.structureType === STRUCTURE_CONTAINER
+                    });
+                }
+                
+                if(!target) {   // literally no where to store
+                    console.log(creep.room.name, 'has hauler with Resources that has no where to store');
+                }else{
+                    helperFunctions.moveToPerform(creep, target, () => helperFunctions.transferAllResource(creep, storage));
+                }
+            }
+            
             // Distributing logic
             const priorities = [
-                {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
-                {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
-                {type: STRUCTURE_TOWER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 200},
+                {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity() > 0},
+                {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity() > 0},
+                {type: STRUCTURE_TOWER, filter: s => s.store.getFreeCapacity() > 200},
                 {type: STRUCTURE_CONTAINER, 
-                    filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 100
+                    filter: s => s.store.getFreeCapacity() > 100
                             && s.id === creep.room.memory.upgraderStructureID},
-                {type: STRUCTURE_STORAGE, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0}
+                {type: STRUCTURE_STORAGE, filter: s => s.store.getFreeCapacity() > 0}
             ];
 
             let target = null;

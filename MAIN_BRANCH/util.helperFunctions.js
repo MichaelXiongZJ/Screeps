@@ -21,13 +21,13 @@ var getSourceTarget = function(creep) {
             // If there are containers, find the one with the maximum stored capacity
             if (containers.length > 0) {
                 target = _.max(containers, (c) => _.sum(c.store));
-                creep.say('container time');
+                creep.say('container');
             }
         }
         
         // look for storage
         if (!target) {
-            creep.say('storage time');
+            creep.say('storage');
             target = creep.room.storage;
         }
         
@@ -38,14 +38,23 @@ var getSourceTarget = function(creep) {
 var collectSourceTarget = function(creep) {
     var target = Game.getObjectById(creep.memory.target);
     if (target) {
-        if (target instanceof Resource && target.resourceType === RESOURCE_ENERGY) {
+        if (target instanceof Resource/* && target.resourceType === RESOURCE_ENERGY*/) {
             this.moveToPerform(creep, target, () => creep.pickup(target));
         } else { // If the target is a container, storage, tombstone, or ruin with energy
-            if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-                this.moveToPerform(creep, target, () => creep.withdraw(target, RESOURCE_ENERGY));
-            } else {
-                return false; // No energy to collect
+            if (creep.memory.role === 'hauler'){    //hauler takes all resoureTypes
+                if (target.store.getUsedCapacity() > 0) {
+                    this.moveToPerform(creep, target, () => this.withdrawAllResource(creep, target));
+                } else {
+                    return false; // No energy to collect
+                }
+            }else{  // others only takes energy
+                if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                    this.moveToPerform(creep, target, () => creep.withdraw(target, RESOURCE_ENERGY));
+                } else {
+                    return false; // No energy to collect
+                }
             }
+
         }
         return true
     } else { // Target no longer exists
@@ -85,6 +94,28 @@ var moveToPerform = function(creep, target, action) {
     }
 };
 
+function withdrawAllResource(creep, target) {
+    let result = OK;
+    for (var resource in target.store) {
+        result = creep.withdraw(target, resource);
+        if (result != OK){
+            creep.say('withdraw failed');
+        }
+    }
+    return result;
+}
+
+function transferAllResource(creep, target) {
+    let result = OK;
+    for (var resource in target.store) {
+        result = creep.transfer(target, resource);
+        if (result != OK){
+            creep.say('transfer failed');
+        }
+    }
+    return result;
+}
+
 var errorConstants = {
     '0': 'OK',
     '-1': 'NOT_OWNER',
@@ -107,6 +138,8 @@ module.exports = {
     getSourceTarget,
     collectSourceTarget,
     selfRecycle,
+    withdrawAllResource,
+    transferAllResource,
     moveToPerform,
     errorConstants,
 };

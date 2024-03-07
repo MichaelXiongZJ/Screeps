@@ -42,9 +42,10 @@ var roleWorker = {
                 creep.memory.target = creep.room.storage.id;
             } else {
                 let target = helperFunctions.getSourceTarget(creep);
-                if (target) {
+                if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
                     creep.memory.target = target.id;
                 } else {    // then MINE
+                    creep.say('harvest');
                     var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES);
                     helperFunctions.moveToPerform(creep, sourceSpot, () => creep.harvest(sourceSpot));
                 }
