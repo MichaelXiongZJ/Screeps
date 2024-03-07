@@ -161,7 +161,8 @@ var roomController = {
     },
 
     calculateJumpStartersNeeded: function(room) {
-        if (!room.memory.totalPopulation || room.memory.totalPopulation === 0){
+        if ((!room.memory.totalPopulation || room.memory.totalPopulation === 0) // no creep left
+            || (room.memory.currentPopulations['harvester']) === room.memory.totalPopulation){  // if harvester is all we have
             return 1;
         }
         return 0;

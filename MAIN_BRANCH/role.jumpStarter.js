@@ -40,20 +40,21 @@ var roleJumpStarter = {
 
     handleCollection: function(creep) {
         if (creep.memory.target){   // has target
-            if (!helperFunctions.collectSourceTarget(creep, creep.memory.target)) { // but target is unavaliable
+            if (helperFunctions.collectSourceTarget(creep, creep.memory.target)) { 
+                return;
+            }else{// but target is unavaliable
                 delete creep.memory.target;
             }
-        }else{  // no target
-            let target = helperFunctions.getSourceTarget(creep);
-            if (target && target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-                creep.memory.target = target.id;
-            } else {    // then MINE
-                creep.say('harvest');
-                var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES,{
-                    filter: source => source.energy > 0
-                });
-                helperFunctions.moveToPerform(creep, sourceSpot, () => creep.harvest(sourceSpot));
-            }
+        } 
+        // no target
+        let target = this.getSourceTarget(creep);
+        if (target) {
+            creep.memory.target = target.id;
+        } else {    // then MINE
+            var sourceSpot = creep.pos.findClosestByPath(FIND_SOURCES,{
+                filter: source => source.energy > 0
+            });
+            helperFunctions.moveToPerform(creep, sourceSpot, () => creep.harvest(sourceSpot));
         }
     },
 
@@ -84,6 +85,39 @@ var roleJumpStarter = {
             helperFunctions.moveToPerform(creep, creep.room.controller, () => creep.upgradeController(creep.room.controller));
         }
     },
+
+
+    getSourceTarget: function(creep) {
+        // First, try to find the closest target among dropped resources, tombstones, and ruins
+        let target = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+                        filter: (r) => r.resourceType === RESOURCE_ENERGY && r.amount > 40
+                    }) ||
+                    creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+                        filter: (t) => t.store.getUsedCapacity(RESOURCE_ENERGY) > 0
+                    }) ||
+                    creep.pos.findClosestByRange(FIND_RUINS, {
+                        filter: (r) => r.store.getUsedCapacity(RESOURCE_ENERGY) > 0
+                    });
+        if (!target) {  // If no such target is found, look for containers
+            var containers = creep.room.find(FIND_STRUCTURES, {
+                filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
+                                s.store.getUsedCapacity() >= 50 &&
+                                s.id != creep.room.memory.upgraderStructureID
+            });
+            if (containers.length > 0) { // If there are containers, find the one with the maximum stored capacity
+                target = _.max(containers, (c) => c.getUsedCapacity(RESOURCE_ENERGY));
+                creep.say('container');
+            }
+        }
+        if (!target) {            // look for storage
+            if (creep.room.storage && creep.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                target = creep.room.storage;
+                creep.say('storage');
+            }
+        }
+        return target;
+    },
+
 };
 
 module.exports = roleJumpStarter;

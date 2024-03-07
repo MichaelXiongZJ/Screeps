@@ -1,60 +1,51 @@
-// Get object to collect from, with Hauler's piority list
-var getSourceTarget = function(creep) {
-        // First, try to find the closest target among dropped resources, tombstones, and ruins
-        let target = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-                        filter: (r) => r.amount > 40
-                    }) ||
-                     creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-                         filter: (t) => t.store.getUsedCapacity() > 0
-                     }) ||
-                     creep.pos.findClosestByRange(FIND_RUINS, {
-                         filter: (r) => r.store.getUsedCapacity() > 0
-                     });
+// // Get object to collect from, with Hauler's piority list
+// var getSourceTarget = function(creep) {
+//         // First, try to find the closest target among dropped resources, tombstones, and ruins
+//         let target = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+//                         filter: (r) => r.amount > 40
+//                     }) ||
+//                      creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+//                          filter: (t) => t.store.getUsedCapacity() > 0
+//                      }) ||
+//                      creep.pos.findClosestByRange(FIND_RUINS, {
+//                          filter: (r) => r.store.getUsedCapacity() > 0
+//                      });
 
-        // If no such target is found, look for containers
-        if (!target) {
-            var containers = creep.room.find(FIND_STRUCTURES, {
-                filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
-                                s.store.getUsedCapacity() >= 50 &&
-                                s.id != creep.room.memory.upgraderStructureID
-            });
-            // If there are containers, find the one with the maximum stored capacity
-            if (containers.length > 0) {
-                target = _.max(containers, (c) => _.sum(c.store));
-                creep.say('container');
-            }
-        }
+//         // If no such target is found, look for containers
+//         if (!target) {
+//             var containers = creep.room.find(FIND_STRUCTURES, {
+//                 filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
+//                                 s.store.getUsedCapacity() >= 50 &&
+//                                 s.id != creep.room.memory.upgraderStructureID
+//             });
+//             // If there are containers, find the one with the maximum stored capacity
+//             if (containers.length > 0) {
+//                 target = _.max(containers, (c) => _.sum(c.store));
+//                 creep.say('container');
+//             }
+//         }
         
-        // look for storage
-        if (!target) {
-            creep.say('storage');
-            target = creep.room.storage;
-        }
+//         // look for storage
+//         if (!target) {
+//             creep.say('storage');
+//             target = creep.room.storage;
+//         }
         
-        return target;
-};
+//         return target;
+// };
 
-// Move to and collect source from target, meant for Hauler
+// Move to and collect source from target, meant NO LONGER for Hauler
 var collectSourceTarget = function(creep) {
     var target = Game.getObjectById(creep.memory.target);
     if (target) {
         if (target instanceof Resource/* && target.resourceType === RESOURCE_ENERGY*/) {
             this.moveToPerform(creep, target, () => creep.pickup(target));
         } else { // If the target is a container, storage, tombstone, or ruin with energy
-            if (creep.memory.role === 'hauler'){    //hauler takes all resoureTypes
-                if (target.store.getUsedCapacity() > 0) {
-                    this.moveToPerform(creep, target, () => this.withdrawAllResource(creep, target));
-                } else {
-                    return false; // No energy to collect
-                }
-            }else{  // others only takes energy
-                if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-                    this.moveToPerform(creep, target, () => creep.withdraw(target, RESOURCE_ENERGY));
-                } else {
-                    return false; // No energy to collect
-                }
+            if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                this.moveToPerform(creep, target, () => creep.withdraw(target, RESOURCE_ENERGY));
+            } else {
+                return false; // No energy to collect
             }
-
         }
         return true
     } else { // Target no longer exists
@@ -98,7 +89,7 @@ function withdrawAllResource(creep, target) {
     let result = OK;
     for (var resource in target.store) {
         result = creep.withdraw(target, resource);
-        if (result != OK){
+        if (result != OK && result !== ERR_NOT_IN_RANGE){
             creep.say('withdraw failed');
         }
     }
@@ -109,11 +100,23 @@ function transferAllResource(creep, target) {
     let result = OK;
     for (var resource in target.store) {
         result = creep.transfer(target, resource);
-        if (result != OK){
+        if (result != OK && result !== ERR_NOT_IN_RANGE){
             creep.say('transfer failed');
         }
     }
     return result;
+}
+
+function getMaxStore(targetList, resourceType) {
+    let maxStoreAmount = 0;
+    var maxStoreTarget = null;
+    for (let target of targetList) {
+        if (target.store.getUsedCapacity(resourceType) > maxStoreAmount) {
+            maxStoreAmount = target.store.getUsedCapacity(resourceType);
+            maxStoreTarget = target;
+        }
+    }
+    return maxStoreTarget;
 }
 
 var errorConstants = {
@@ -135,11 +138,12 @@ var errorConstants = {
 };
 
 module.exports = {
-    getSourceTarget,
+    // getSourceTarget,
     collectSourceTarget,
     selfRecycle,
     withdrawAllResource,
     transferAllResource,
     moveToPerform,
+    getMaxStore,
     errorConstants,
 };
