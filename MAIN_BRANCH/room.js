@@ -112,7 +112,7 @@ var roomController = {
                 if (!pop[creep.memory.role]) {
                     pop[creep.memory.role] = 0;
                 }
-                if (creep.ticksToLive >= 20){
+                if (creep.ticksToLive > 20){
                     pop[creep.memory.role]++;
                 }
                 totalPopulation++;

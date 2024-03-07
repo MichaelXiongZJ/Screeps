@@ -10,7 +10,6 @@ var roleWorker = {
             return;
         }
         
-
         if (creep.memory.working) {
             this.handleWork(creep);
         } else {

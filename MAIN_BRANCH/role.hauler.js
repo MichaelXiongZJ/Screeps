@@ -4,10 +4,10 @@ var roleHauler = {
     
     run: function(creep) {
         this.updateStates(creep);
-        if (creep.memory.recycle){
-            helperFunctions.selfRecycle(creep);
-            return;
-        }
+        // if (creep.memory.recycle){
+        //     helperFunctions.selfRecycle(creep);
+        //     return;
+        // }
         if (!creep.memory.hauling) {
             this.collect(creep);
         } else {

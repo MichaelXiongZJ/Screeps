@@ -39,9 +39,10 @@ var roleSpawn = {
                     }
                     let result = spawn.spawnCreep(body, name, {memory: memory});
                     if (result === OK){
-                        console.log(spawn, 'spawning: ', name);
+                        console.log(spawn.name + ' at ' + room.name + ' spawning: ' + name);
                         break;
                     }else if (result === ERR_NOT_ENOUGH_ENERGY){
+                        console.log(spawn.name + ' at ' + room.name + ' waiting for energy to spawn: ' + name);
                         break;
                     }
                 }

@@ -61,9 +61,6 @@ module.exports.loop = function() {
     
     if(Game.cpu.bucket == 10000) {
         Game.cpu.generatePixel();
-        console.log('Generating pixel!');
-    }else{
-        console.log( 'CPU bucket: ', Game.cpu.bucket);
+        console.log('Generating pixel from 10000 cpu buckets');
     }
-
 }

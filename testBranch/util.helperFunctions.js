@@ -56,7 +56,7 @@ var collectSourceTarget = function(creep) {
 
 var selfRecycle = function(creep){
     var container = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-        filter: (s) => s.structureType === STRUCTURE_CONTAINER
+        filter: (s) => s.structureType == STRUCTURE_CONTAINER
     });
     if (container) {
         creep.say("unalive me");

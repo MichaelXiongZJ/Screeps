@@ -17,7 +17,7 @@ var getSourceTarget = function(creep) {
                             s.id != creep.room.memory.upgraderStructureID
         });
         if (containers.length > 0) { // If there are containers, find the one with the maximum stored capacity
-            target = helperFunctions.getMaxStore(containers, RESOURCE_ENERGY);
+            target = this.getMaxStore(containers, RESOURCE_ENERGY);
             creep.say('container');
         }
     }
