@@ -1,38 +1,34 @@
-// // Get object to collect from, with Hauler's piority list
-// var getSourceTarget = function(creep) {
-//         // First, try to find the closest target among dropped resources, tombstones, and ruins
-//         let target = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
-//                         filter: (r) => r.amount > 40
-//                     }) ||
-//                      creep.pos.findClosestByPath(FIND_TOMBSTONES, {
-//                          filter: (t) => t.store.getUsedCapacity() > 0
-//                      }) ||
-//                      creep.pos.findClosestByRange(FIND_RUINS, {
-//                          filter: (r) => r.store.getUsedCapacity() > 0
-//                      });
-
-//         // If no such target is found, look for containers
-//         if (!target) {
-//             var containers = creep.room.find(FIND_STRUCTURES, {
-//                 filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
-//                                 s.store.getUsedCapacity() >= 50 &&
-//                                 s.id != creep.room.memory.upgraderStructureID
-//             });
-//             // If there are containers, find the one with the maximum stored capacity
-//             if (containers.length > 0) {
-//                 target = _.max(containers, (c) => _.sum(c.store));
-//                 creep.say('container');
-//             }
-//         }
-        
-//         // look for storage
-//         if (!target) {
-//             creep.say('storage');
-//             target = creep.room.storage;
-//         }
-        
-//         return target;
-// };
+// Get object to collect from, NOT for hauler
+var getSourceTarget = function(creep) {
+    // First, try to find the closest target among dropped resources, tombstones, and ruins
+    let target = creep.pos.findClosestByPath(FIND_DROPPED_RESOURCES, {
+                    filter: (r) => r.resourceType === RESOURCE_ENERGY && r.amount > 40
+                }) ||
+                creep.pos.findClosestByPath(FIND_TOMBSTONES, {
+                    filter: (t) => t.store.getUsedCapacity(RESOURCE_ENERGY) > 0
+                }) ||
+                creep.pos.findClosestByRange(FIND_RUINS, {
+                    filter: (r) => r.store.getUsedCapacity(RESOURCE_ENERGY) > 0
+                });
+    if (!target) {  // If no such target is found, look for containers
+        var containers = creep.room.find(FIND_STRUCTURES, {
+            filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
+                            s.store.getUsedCapacity() >= 50 &&
+                            s.id != creep.room.memory.upgraderStructureID
+        });
+        if (containers.length > 0) { // If there are containers, find the one with the maximum stored capacity
+            target = helperFunctions.getMaxStore(containers, RESOURCE_ENERGY);
+            creep.say('container');
+        }
+    }
+    if (!target) {            // look for storage
+        if (creep.room.storage && creep.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+            target = creep.room.storage;
+            creep.say('storage');
+        }
+    }
+    return target;
+};
 
 // Move to and collect source from target, meant NO LONGER for Hauler
 var collectSourceTarget = function(creep) {
@@ -138,7 +134,7 @@ var errorConstants = {
 };
 
 module.exports = {
-    // getSourceTarget,
+    getSourceTarget,
     collectSourceTarget,
     selfRecycle,
     withdrawAllResource,

@@ -81,7 +81,7 @@ var roleHauler = {
             if (!target) { // If no such target is found, look for containers
                 var containers = creep.room.find(FIND_STRUCTURES, {
                     filter: (s) => s.structureType == STRUCTURE_CONTAINER && 
-                                    s.store.getUsedCapacity() >= 50 &&
+                                    s.store.getUsedCapacity() >= 100 &&
                                     s.id != creep.room.memory.upgraderStructureID
                 });
                 // If there are containers, find the one with the maximum stored capacity
