@@ -105,7 +105,7 @@ var roleJumpStarter = {
                                 s.id != creep.room.memory.upgraderStructureID
             });
             if (containers.length > 0) { // If there are containers, find the one with the maximum stored capacity
-                target = _.max(containers, (c) => c.getUsedCapacity(RESOURCE_ENERGY));
+                target = helperFunctions.getMaxStore(containers, RESOURCE_ENERGY);
                 creep.say('container');
             }
         }
