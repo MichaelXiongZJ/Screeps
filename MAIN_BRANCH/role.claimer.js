@@ -13,7 +13,7 @@ var roleClaimer = {
                 helperFunctions.moveToPerform(creep, newController, () => creep.claimController(newController));
             }else{  // room got no controller, move to center
                 console.log("Claimer arrived, but room has no controller.")
-            }   
+            }  
         }
     }
 };

@@ -9,7 +9,7 @@ var roleClaimer = require('role.claimer');
 
 module.exports.loop = function() {
     
-    // Clean up room for new season
+    // Clean up room memories
     // for (var myRoomName in Memory.rooms) {
     //     if (!Game.rooms[myRoomName]) {
     //         delete Memory.rooms[myRoomName];
@@ -33,8 +33,11 @@ module.exports.loop = function() {
 
     // All the Spawns I have access to
     for (let spawnName in Game.spawns) {
-        let spawn = Game.spawns[spawnName];
-        roleSpawn.run(spawn);
+        if (spawnName != 'Spawn5'){ //temp
+            let spawn = Game.spawns[spawnName];
+            roleSpawn.run(spawn);
+        }
+
     }
 
     // All the creeps I have access to

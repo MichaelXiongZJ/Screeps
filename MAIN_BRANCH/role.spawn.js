@@ -44,6 +44,8 @@ var roleSpawn = {
                     }else if (result === ERR_NOT_ENOUGH_ENERGY){
                         console.log(spawn.name + ' at ' + room.name + ' waiting for energy to spawn: ' + name);
                         break;
+                    }else{
+                        console.log(spawn.name + ' at ' + room.name + ' has error spawning: ' + name + '. Error: ' + result);
                     }
                 }
             }

@@ -23,13 +23,14 @@ var roleHauler = {
                 if(!target) {   // literally no where to store
                     console.log(creep.room.name, 'has hauler with Resources that has no where to store');
                 }else{
-                    helperFunctions.moveToPerform(creep, target, () => helperFunctions.transferAllResource(creep, storage));
+                    helperFunctions.moveToPerform(creep, target, () => helperFunctions.transferAllResource(creep, target));
+                    return;
                 }
             }
             const priorities = [
-                {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
-                {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
                 {type: STRUCTURE_TOWER, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 200},
+                {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+                {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
                 {type: STRUCTURE_CONTAINER, 
                     filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 100
                             && s.id === creep.room.memory.upgraderStructureID},
@@ -42,7 +43,7 @@ var roleHauler = {
     updateStates: function(creep) {
         if (creep.ticksToLive < 50 && creep.store.getUsedCapacity() === 0) {
             creep.memory.recycle = true;
-        } else if (!creep.memory.hauling && creep.store.getUsedCapacity() > creep.store.getCapacity()*0.9) {
+        } else if (!creep.memory.hauling && creep.store.getUsedCapacity() > creep.store.getFreeCapacity()) {    //if more than half
             creep.memory.hauling = true;
             delete creep.memory.target;
             creep.say('🔄haul');
@@ -104,8 +105,8 @@ var roleHauler = {
             if (target instanceof Resource/* && target.resourceType === RESOURCE_ENERGY*/) {
                 helperFunctions.moveToPerform(creep, target, () => creep.pickup(target));
             } else { // If the target is a container, storage, tombstone, or ruin with energy
-                if (target.store.getUsedCapacity() > 0) {
-                    helperFunctions.moveToPerform(creep, target, () => helperFunctions.withdrawAllResource(creep, target));
+                if (target.store.getUsedCapacity(RESOURCE_ENERGY) > 20) {
+                    helperFunctions.moveToPerform(creep, target, () => creep.withdraw(target, RESOURCE_ENERGY));
                 } else {
                     return false; // No energy to collect
                 }

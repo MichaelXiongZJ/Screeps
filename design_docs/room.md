@@ -32,3 +32,7 @@
     - each (Link, role) will be saved in memory
     - if there exist a link without a role:
         - run initiate_links, which will refresh role for every link
+- Label spawns
+    - label them as main/backup
+- Reserved room
+

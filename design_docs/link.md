@@ -20,3 +20,6 @@ Link is needed for long distance harvesting and long distance controller upgrade
 
 # Initiating link roles
     - Handeled by the room
+
+
+    note: for every link exists, hauler needed - 1, but min: 1

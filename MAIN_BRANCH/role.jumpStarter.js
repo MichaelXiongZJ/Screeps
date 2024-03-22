@@ -61,8 +61,8 @@ var roleJumpStarter = {
     handleWork: function(creep) {
 
         const priorities = [    // haul piority
-            {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
             {type: STRUCTURE_EXTENSION, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
+            {type: STRUCTURE_SPAWN, filter: s => s.store.getFreeCapacity(RESOURCE_ENERGY) > 0},
         ];
 
         let target = null;  // find a haul target

@@ -77,7 +77,7 @@ var moveToPerform = function(creep, target, action) {
         });
     }else if (result !== OK){
         let errMsg = this.errorConstants[result.toString()] || 'UNKNOWN_ERROR';
-        creep.say(`${errMsg}`);
+        creep.say(errMsg);
     }
 };
 
@@ -86,22 +86,22 @@ function withdrawAllResource(creep, target) {
     for (var resource in target.store) {
         result = creep.withdraw(target, resource);
         if (result != OK && result !== ERR_NOT_IN_RANGE){
-            creep.say('withdraw failed');
+            console.log(creep.name + " failed to withdraw all resource. error: " + this.errorConstants[result.toString()]);
         }
     }
     return result;
-}
+};
 
 function transferAllResource(creep, target) {
     let result = OK;
-    for (var resource in target.store) {
+    for (var resource in creep.store) {
         result = creep.transfer(target, resource);
         if (result != OK && result !== ERR_NOT_IN_RANGE){
-            creep.say('transfer failed');
+            console.log(creep.name + " failed to transfer all resource. error: " + this.errorConstants[result.toString()]);
         }
     }
     return result;
-}
+};
 
 function getMaxStore(targetList, resourceType) {
     let maxStoreAmount = 0;
@@ -113,7 +113,26 @@ function getMaxStore(targetList, resourceType) {
         }
     }
     return maxStoreTarget;
-}
+};
+
+function oneStepIntoRoom(creep) {
+    if (creep.pos.x = 49) { // right edge
+        creep.move(LEFT);
+    }
+    
+    if (creep.pos.x = 0) { // left edge
+        creep.move(RIGHT);
+    }
+    
+    if (creep.pos.y = 0) { // top edge
+        creep.move(BOTTOM);
+    }
+    
+    if (creep.pos.y = 49) { // bottom edge
+        creep.move(TOP);
+    }
+};
+
 
 var errorConstants = {
     '0': 'OK',
@@ -141,5 +160,6 @@ module.exports = {
     transferAllResource,
     moveToPerform,
     getMaxStore,
+    oneStepIntoRoom,
     errorConstants,
 };

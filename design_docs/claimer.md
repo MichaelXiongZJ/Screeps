@@ -12,8 +12,9 @@
 
 
 
-Game.spawns['Spawn1'].spawnCreep([CLAIM, MOVE], 'claimer' + Game.time, {memory: {role: 'claimer',workRoom: 'E39S28',}});
+Game.spawns['Spawn3'].spawnCreep([CLAIM, MOVE], 'claimer' + Game.time, {memory: {role: 'claimer',workRoom: 'E38S23',}});
 
 
 Game.spawns['Spawn1'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], 'jumpStarter' + Game.time, {memory: {role: 'jumpStarter',workRoom: 'E39S28',}});
 
+Game.spawns['Spawn3'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], 'jumpStarter' + Game.time, {memory: {role: 'jumpStarter',workRoom: 'E38S23',}});  // level 5

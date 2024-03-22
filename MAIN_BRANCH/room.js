@@ -12,8 +12,8 @@ var roomController = {
         room.memory.fix_list = room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.hits < structure.hitsMax)
-                    && !(structure.structureType === STRUCTURE_WALL && structure.hits > 2000) 
-                    && !(structure.structureType === STRUCTURE_RAMPART /*&& structure.hits > 2000*/)
+                    && !(structure.structureType === STRUCTURE_WALL && structure.hits > 3000) 
+                    && !(structure.structureType === STRUCTURE_RAMPART && structure.hits > 3000)
             }
         }).map(structure => structure.id);
 
@@ -24,8 +24,8 @@ var roomController = {
             room.memory.sources.forEach(sourceAssignment => {
                 if (sourceAssignment.harvester) {
                     const harvesterCreep = Game.creeps[sourceAssignment.harvester];
-                    // Check if the harvester exists, has more than 20 ticks to live, and is in the same room as the source
-                    if (!harvesterCreep || harvesterCreep.ticksToLive < 20 || harvesterCreep.room.name !== room.name) {
+                    // Check if the harvester exists, has more than 50 ticks to live, and is in the same room as the source
+                    if (!harvesterCreep || harvesterCreep.ticksToLive < 50 || harvesterCreep.room.name !== room.name) {
                         sourceAssignment.harvester = null;
                     }
                 }
@@ -63,7 +63,7 @@ var roomController = {
             harvester: numSources,
             hauler: this.calculateHaulersNeeded(room, numSources, roomPowerLevel),
             worker: this.calculateWorkersNeeded(room, numSources, roomPowerLevel),
-            upgrader: this.calculatedUpgradersNeeded(room),
+            upgrader: this.calculatedUpgradersNeeded(room, numSources, roomPowerLevel),
             jumpStarter: this.calculateJumpStartersNeeded(room),
         };
         const currentPopulations = this.getCurrentPopulation(room);
@@ -112,7 +112,7 @@ var roomController = {
                 if (!pop[creep.memory.role]) {
                     pop[creep.memory.role] = 0;
                 }
-                if (creep.ticksToLive > 20){
+                if (creep.ticksToLive > 35){
                     pop[creep.memory.role]++;
                 }
                 totalPopulation++;
@@ -123,14 +123,25 @@ var roomController = {
         return population
     }, 
     
-    calculatedUpgradersNeeded: function(room) {
+    calculatedUpgradersNeeded: function(room, numSources, roomLevel) {
         var struct = Game.getObjectById(room.memory.upgraderStructureID);
         if(struct){
-            if (struct.store.getFreeCapacity() === 0){
-                return 2;
-            }else if (struct.store.getUsedCapacity() > 0){
+            // if (struct.store.getFreeCapacity() === 0){
+            //     return 2;
+            //     // return 1;
+            // }else if (struct.store.getUsedCapacity() > 0){
+            //     return 1;
+            // }      
+            // if (roomLevel > 4 && struct.store.getUsedCapacity() > 0) {
+            //     return 1;
+            // }else if (struct.store.getFreeCapacity() === 0) {
+            //     return 2;
+            // }else if (struct.store.getUsedCapacity() > 0){
+            //     return 1;
+            // }
+            if (struct.store.getUsedCapacity() > 0){
                 return 1;
-            }           
+            }
         }
         return 0;
     },
@@ -153,11 +164,16 @@ var roomController = {
         var wanted = Math.ceil(effectiveLength / 2);
         
         if (roomLevel < 2){
-            return numSources*2 + 1;
-        }else if (roomLevel < 5){
-            return Math.min(wanted, 3);
+            return 10
         }
-        return wanted;
+        
+        if (wanted === 0){    // tmp
+            return 0;
+        } else if (wanted < 3){
+            return 1;
+        }else {
+            return 2;
+        }
     },
 
     calculateJumpStartersNeeded: function(room) {
