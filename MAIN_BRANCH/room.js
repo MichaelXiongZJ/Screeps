@@ -140,6 +140,9 @@ var roomController = {
             //     return 1;
             // }
             if (struct.store.getUsedCapacity() > 0){
+                if (roomLevel < 3){
+                    return 3;
+                }
                 return 1;
             }
         }

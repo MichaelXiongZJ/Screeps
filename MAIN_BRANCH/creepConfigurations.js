@@ -10,12 +10,12 @@ const spawnOrder = ['jumpStarter','harvester','hauler','worker','upgrader'];
 
 const creepConfigs = {
     harvester: {
-        1: { body: [WORK,WORK,MOVE] },                              //250
-        2: { body: [WORK,WORK,WORK,WORK,WORK,MOVE] },               //550
-        3: { body: [WORK,WORK,WORK,WORK,WORK,MOVE] },               //550
-        4: { body: [WORK,WORK,WORK,WORK,WORK,MOVE] },               //550
-        5: { body: [WORK,WORK,WORK,WORK,WORK,MOVE] },
-        6: { body: [WORK,WORK,WORK,WORK,WORK,MOVE] },
+        1: { body: [MOVE,WORK,WORK] },                              //250
+        2: { body: [MOVE,WORK,WORK,WORK,WORK,WORK] },               //550
+        3: { body: [MOVE,WORK,WORK,WORK,WORK,WORK] },               //550
+        4: { body: [MOVE,WORK,WORK,WORK,WORK,WORK] },               //550
+        5: { body: [MOVE,WORK,WORK,WORK,WORK,WORK] },
+        6: { body: [MOVE,WORK,WORK,WORK,WORK,WORK] },
     },
     hauler: {
         1: { body: [CARRY,CARRY,CARRY,MOVE,MOVE,MOVE] },   //300
@@ -35,10 +35,10 @@ const creepConfigs = {
         //             MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,  //15 moves
         //             MOVE,MOVE,MOVE,MOVE,MOVE] },    //2250
         6: { body: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-            CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
-            CARRY,CARRY,CARRY,CARRY,    //24 carries
-            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,  //12 moves
-            MOVE,MOVE] },    //1800
+                    CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,
+                    CARRY,CARRY,CARRY,CARRY,    //24 carries
+                    MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,  //12 moves
+                    MOVE,MOVE] },    //1800
     },
     worker: {
         1: { body: [WORK,CARRY,MOVE,MOVE] },    //300

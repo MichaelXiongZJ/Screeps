@@ -33,7 +33,7 @@ module.exports.loop = function() {
 
     // All the Spawns I have access to
     for (let spawnName in Game.spawns) {
-        if (spawnName != 'Spawn5'){ //temp
+        if (spawnName.name != 'Spawn5'){ //temp
             let spawn = Game.spawns[spawnName];
             roleSpawn.run(spawn);
         }
